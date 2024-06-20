@@ -1,4 +1,5 @@
 import telebot
+from telebot import types
 import pandas as pd
 import os
 from telegram import InputMediaPhoto
@@ -102,7 +103,7 @@ def get_csv_path_by_map(mode, map_name):
 def calculate_win_probability(csv_path, characters):
     try:
         if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"File '{csv_path}' not found.")
+            raise FileNotFoundError(f"Файл '{csv_path}' не найден.")
 
         df = pd.read_csv(csv_path, encoding='cp1251')
         df_two_columns = df.iloc[:, :2]
@@ -112,24 +113,24 @@ def calculate_win_probability(csv_path, characters):
         filtered_pairs = [pair for pair in pairs if pair[0] in names_to_filter]
 
         if not filtered_pairs:
-            raise ValueError("None of the characters provided are found in the dataset.")
+            raise ValueError("Ни один из указанных символов не найден в наборе данных.")
 
         second_column_values = [pair[1] for pair in filtered_pairs]
         numeric_values = list(map(float, second_column_values))
 
         if len(numeric_values) < 3:
-            raise ValueError("Insufficient data to calculate win probability.")
+            raise ValueError("Недостаточно данных для расчета вероятности выигрыша.")
 
         percentWin = round(sum(numeric_values) / 3 * 100, 1)
 
     except FileNotFoundError as e:
-        print(f"File '{csv_path}' not found: {e}")
+        print(f"Файл '{csv_path}' найден: {e}")
         return None, None
     except ValueError as e:
-        print(f"Error calculating win probability: {e}")
+        print(f"Недостаточно данных для расчета вероятности выигрыша: {e}")
         return names_to_filter, None
     except Exception as e:
-        print(f"Error processing file '{csv_path}': {str(e)}")
+        print(f"Ошибка '{csv_path}': {str(e)}")
         return None, None
 
     return names_to_filter, percentWin
@@ -137,9 +138,12 @@ def calculate_win_probability(csv_path, characters):
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
-    bot.send_message(message.chat.id, "Привет дорогой бравлер!ㅤ/ᐠ - ˕ -マ  Я могу помочь тебе определить шанс выигрыша твоей команды в игре ✰BRAWL STARS✰. \n"
-                                      "Для того чтобы начать, выбери режим игры (обязательно 3 на 3):")
-    send_mode_keyboard(message)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item_start = types.KeyboardButton('начать')
+    markup.add(item_start)
+
+    bot.send_message(message.chat.id, "𓆝 𓆟 loading? тыкни 'начать' 𓆝 𓆟",
+                     reply_markup=markup)
 
 
 @bot.message_handler(func=lambda message: True)
