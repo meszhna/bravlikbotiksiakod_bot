@@ -1,7 +1,8 @@
 import telebot
-from telebot import types
 import pandas as pd
 import os
+from telegram import InputMediaPhoto
+from telebot import types
 
 
 TOKEN = '7461237013:AAGAh1BeaqRDiQ-SY2caHHyM7iVpusmvzYs'
@@ -134,6 +135,13 @@ def calculate_win_probability(csv_path, characters):
     return names_to_filter, percentWin
 
 
+@bot.message_handler(commands=['start'])
+def handle_start(message):
+    bot.send_message(message.chat.id, "Привет дорогой бравлер!ㅤ/ᐠ - ˕ -マ  Я могу помочь тебе определить шанс выигрыша твоей команды в игре ✰BRAWL STARS✰. \n"
+                                      "Для того чтобы начать, выбери режим игры (обязательно 3 на 3):")
+    send_mode_keyboard(message)
+
+
 @bot.message_handler(func=lambda message: True)
 def handle_text(message):
     text = message.text.strip().lower()
@@ -207,7 +215,24 @@ def handle_callback(call):
             if chat_id in user_context and 'mode' in user_context[chat_id]:
                 mode = user_context[chat_id]['mode']
                 user_context[chat_id]['map'] = map_name
-                bot.send_message(chat_id, f"Отлично! Теперь введи список персонажей, разделенных запятой, для режима '{mode}' и карты '{map_name}'.")
+                photo_paths = [
+                    'картинки/помощь с персонажами/персы1.jpg',
+                    'картинки/помощь с персонажами/персы2.jpg',
+                    'картинки/помощь с персонажами/персы3.jpg',
+                    'картинки/помощь с персонажами/персы4.jpg',
+                    'картинки/помощь с персонажами/персы5.jpg',
+                    'картинки/помощь с персонажами/персы6.jpg',
+                    'картинки/помощь с персонажами/персы7.jpg',
+                    'картинки/помощь с персонажами/персы8.jpg'
+                ]
+
+                media = [types.InputMediaPhoto(media=open(photo_path, 'rb')) for photo_path in photo_paths]
+
+                bot.send_media_group(chat_id, media)
+
+                caption = f"Отлично! Теперь введи список персонажей, разделенных запятой, для режима '{mode}' и карты '{map_name}'." \
+                          f" Для этого перепиши имя нужного персонажа с картинки, чтобы я не ошибся (напиши их КАПСОМ)"
+                bot.send_message(chat_id, caption)
             else:
                 bot.send_message(chat_id, "Произошла ошибка⚠️. Пожалуйста, начни сначала выбрав режим и карту.")
 
